@@ -1,84 +1,124 @@
 import React from 'react';
-import { TrendingUp, Target, Calendar } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Trophy, Target, Zap, Award } from 'lucide-react';
 
-const ProgressTracker = ({ completedToday, totalRituals, completionRate, streakCount, variant = 'streak' }) => {
+const ProgressTracker = ({ userData, variant = 'streak' }) => {
+  const weeklyData = [
+    { day: 'Mon', completed: 3 },
+    { day: 'Tue', completed: 2 },
+    { day: 'Wed', completed: 4 },
+    { day: 'Thu', completed: 1 },
+    { day: 'Fri', completed: 3 },
+    { day: 'Sat', completed: 2 },
+    { day: 'Sun', completed: 4 },
+  ];
+
+  const monthlyProgress = [
+    { week: 'W1', rituals: 12 },
+    { week: 'W2', rituals: 18 },
+    { week: 'W3', rituals: 15 },
+    { week: 'W4', rituals: 22 },
+  ];
+
   if (variant === 'badges') {
-    const badges = [
-      { id: 'first-ritual', name: 'First Steps', icon: '🌱', description: 'Completed your first ritual' },
-      { id: 'week-warrior', name: 'Week Warrior', icon: '⚡', description: '7-day streak achieved' },
-      { id: 'mindful-master', name: 'Mindful Master', icon: '🧘‍♀️', description: '50 mindfulness sessions' },
-      { id: 'gratitude-guru', name: 'Gratitude Guru', icon: '🙏', description: '30 gratitude entries' }
-    ];
-
     return (
-      <div className="glass-card rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-          <Target className="w-5 h-5 mr-2" />
-          Achievements
+      <div className="glass rounded-xl p-6 border border-white/30">
+        <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <Award className="w-6 h-6" />
+          Your Badges
         </h3>
-        <div className="grid grid-cols-2 gap-3">
-          {badges.map(badge => (
-            <div key={badge.id} className="glass rounded-lg p-3 text-center">
-              <div className="text-2xl mb-1">{badge.icon}</div>
-              <div className="text-sm font-medium text-white">{badge.name}</div>
-              <div className="text-xs text-white/60">{badge.description}</div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {userData.badges?.map((badge, index) => (
+            <div key={index} className="bg-white/10 rounded-lg p-4 text-center backdrop-blur-sm border border-white/20">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="text-white font-medium text-sm">{badge.name}</h4>
+              <p className="text-white/70 text-xs mt-1">{badge.description}</p>
             </div>
           ))}
+          
+          {(!userData.badges || userData.badges.length === 0) && (
+            <div className="col-span-full text-center py-8">
+              <Trophy className="w-12 h-12 text-white/40 mx-auto mb-2" />
+              <p className="text-white/60">Complete rituals to earn badges!</p>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card rounded-xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2" />
-          Today's Progress
-        </h3>
-        <div className="text-sm text-white/60">
-          {completedToday}/{totalRituals} completed
+    <div className="glass rounded-xl p-6 border border-white/30">
+      <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+        <Target className="w-6 h-6" />
+        Progress Overview
+      </h3>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-orange-400" />
+            </div>
+            <div>
+              <p className="text-white/70 text-sm">Current Streak</p>
+              <p className="text-white text-xl font-bold">{userData.streakCount || 0} days</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <Trophy className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-white/70 text-sm">Total Points</p>
+              <p className="text-white text-xl font-bold">{userData.totalPoints || 0}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <Award className="w-5 h-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-white/70 text-sm">Badges Earned</p>
+              <p className="text-white text-xl font-bold">{userData.badges?.length || 0}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="relative">
-        <div className="w-full bg-white/10 rounded-full h-3">
-          <div
-            className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500"
-            style={{ width: `${completionRate}%` }}
-          ></div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white/5 rounded-lg p-4 backdrop-blur-sm border border-white/10">
+          <h4 className="text-white font-medium mb-4">This Week</h4>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={weeklyData}>
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+              <Bar dataKey="completed" fill="rgba(59, 130, 246, 0.8)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <div className="absolute -top-8 left-0 text-xs text-white/60">
-          0%
-        </div>
-        <div className="absolute -top-8 right-0 text-xs text-white/60">
-          100%
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-white">{Math.round(completionRate)}%</div>
-          <div className="text-sm text-white/60">Completion Rate</div>
+        <div className="bg-white/5 rounded-lg p-4 backdrop-blur-sm border border-white/10">
+          <h4 className="text-white font-medium mb-4">Monthly Trend</h4>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={monthlyProgress}>
+              <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+              <Line type="monotone" dataKey="rituals" stroke="#10B981" strokeWidth={3} dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-white">{streakCount}</div>
-          <div className="text-sm text-white/60">Day Streak</div>
-        </div>
-      </div>
-
-      {/* Motivational Message */}
-      <div className="mt-4 p-3 glass rounded-lg">
-        <p className="text-sm text-white/80 text-center">
-          {completionRate === 100 
-            ? "🎉 Perfect day! You're building incredible resilience!"
-            : completionRate >= 50
-            ? "💪 Great progress! Keep the momentum going!"
-            : "🌱 Every step counts. You've got this!"
-          }
-        </p>
       </div>
     </div>
   );

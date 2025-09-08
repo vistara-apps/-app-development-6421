@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: 'hsl(220, 10%, 95%)',
-        accent: 'hsl(150, 70%, 45%)',
-        primary: 'hsl(220, 80%, 50%)',
-        surface: 'hsl(220, 10%, 100%)',
+        'bg': 'hsl(220, 10%, 95%)',
+        'accent': 'hsl(150, 70%, 45%)',
+        'primary': 'hsl(220, 80%, 50%)',
+        'surface': 'hsl(220, 10%, 100%)',
         'text-primary': 'hsl(220, 15%, 15%)',
         'text-secondary': 'hsl(220, 10%, 40%)',
       },
@@ -26,10 +26,6 @@ export default {
       },
       boxShadow: {
         'card': '0 8px 24px hsla(220, 15%, 15%, 0.12)',
-        'glass': '0 8px 32px rgba(31, 38, 135, 0.37)',
-      },
-      backdropBlur: {
-        'glass': '10px',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

@@ -18,21 +18,17 @@ import {
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import App from './App.tsx'
 import './index.css'
-
-const config = getDefaultConfig({
-  appName: "Resilience Rituals",
-  projectId: "9f4bd472c01ba49282b42e5e1874c2af",
-  chains: [mainnet, polygon, optimism, arbitrum, base],
-});
-
-const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
+    <WagmiProvider config={getDefaultConfig({
+      appName: "Resilience Rituals",
+      projectId: "9f4bd472c01ba49282b42e5e1874c2af",
+      chains: [mainnet, polygon, optimism, arbitrum, base],
+    })}>
+      <QueryClientProvider client={new QueryClient()}>
         <RainbowKitProvider>
           <App />
         </RainbowKitProvider>

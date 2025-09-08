@@ -1,85 +1,40 @@
 import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Home, Plus, TrendingUp, Menu } from 'lucide-react';
+import { Sparkles, Heart, Trophy } from 'lucide-react';
 
-const AppShell = ({ children, currentView, onViewChange }) => {
-  const floatingShapes = Array.from({ length: 8 }, (_, i) => (
-    <div
-      key={i}
-      className={`floating-shape animate-float`}
-      style={{
-        width: `${Math.random() * 100 + 50}px`,
-        height: `${Math.random() * 100 + 50}px`,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        animationDelay: `${Math.random() * 3}s`,
-        animationDuration: `${4 + Math.random() * 4}s`
-      }}
-    />
-  ));
-
+const AppShell = ({ children, title = "Resilience Rituals" }) => {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Floating background shapes */}
-      <div className="fixed inset-0 pointer-events-none">
-        {floatingShapes}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+      {/* Floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-float"></div>
+        <div className="absolute top-40 right-20 w-6 h-6 bg-white/15 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-60 left-1/4 w-3 h-3 bg-white/25 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-80 right-1/3 w-5 h-5 bg-white/10 rounded-full animate-float" style={{animationDelay: '3s'}}></div>
       </div>
 
       {/* Header */}
-      <header className="relative z-10 glass-card m-4 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"></div>
-            <h1 className="text-xl font-bold text-white">Resilience Rituals</h1>
+      <header className="relative z-10 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">{title}</h1>
+              <p className="text-white/80 text-sm">Build unbreakable emotional resilience</p>
+            </div>
           </div>
-          <div className="scale-75">
-            <ConnectButton />
-          </div>
+          <ConnectButton />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 p-4">
-        {children}
-      </main>
-
-      {/* Navigation */}
-      <nav className="fixed bottom-4 left-4 right-4 z-20">
-        <div className="glass-card rounded-xl p-2">
-          <div className="flex justify-around items-center">
-            <button
-              onClick={() => onViewChange('dashboard')}
-              className={`p-3 rounded-lg transition-all duration-200 ${
-                currentView === 'dashboard' 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/60 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Home size={24} />
-            </button>
-            <button
-              onClick={() => onViewChange('create')}
-              className={`p-3 rounded-lg transition-all duration-200 ${
-                currentView === 'create' 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/60 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Plus size={24} />
-            </button>
-            <button
-              onClick={() => onViewChange('progress')}
-              className={`p-3 rounded-lg transition-all duration-200 ${
-                currentView === 'progress' 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/60 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <TrendingUp size={24} />
-            </button>
-          </div>
+      <main className="relative z-10 px-4 pb-8">
+        <div className="max-w-7xl mx-auto">
+          {children}
         </div>
-      </nav>
+      </main>
     </div>
   );
 };
