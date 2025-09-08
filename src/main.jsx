@@ -18,17 +18,22 @@ import {
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App.jsx'
 import './index.css'
+
+const config = getDefaultConfig({
+  appName: "Resilience Rituals",
+  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || "your-walletconnect-project-id",
+  chains: [base, mainnet, polygon, optimism, arbitrum],
+  ssr: false,
+});
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <WagmiProvider config={getDefaultConfig({
-      appName: "Resilience Rituals",
-      projectId: "9f4bd472c01ba49282b42e5e1874c2af",
-      chains: [mainnet, polygon, optimism, arbitrum, base],
-    })}>
-      <QueryClientProvider client={new QueryClient()}>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
           <App />
         </RainbowKitProvider>

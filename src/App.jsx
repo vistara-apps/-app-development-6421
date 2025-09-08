@@ -4,100 +4,126 @@ import AppShell from './components/AppShell';
 import RitualCard from './components/RitualCard';
 import ProgressTracker from './components/ProgressTracker';
 import PremiumModal from './components/PremiumModal';
+import SettingsView from './components/SettingsView';
+import BadgesView from './components/BadgesView';
+import RitualCompletionModal from './components/RitualCompletionModal';
+import { useAppData } from './hooks/useAppData';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isPremium, setIsPremium] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [rituals, setRituals] = useState([
-    {
-      id: 1,
-      name: "Morning Gratitude",
-      description: "Write down 3 things you're grateful for",
-      streak: 5,
-      points: 25,
-      completed: false,
-      category: "mindfulness"
-    },
-    {
-      id: 2,
-      name: "Deep Breathing",
-      description: "5 minutes of mindful breathing",
-      streak: 3,
-      points: 15,
-      completed: false,
-      category: "wellness"
-    },
-    {
-      id: 3,
-      name: "Positive Affirmation",
-      description: "Repeat your personal power statement",
-      streak: 7,
-      points: 35,
-      completed: true,
-      category: "mindset"
-    }
-  ]);
-
-  const [userData, setUserData] = useState({
-    streakCount: 7,
-    totalPoints: 150,
-    badges: [
-      { name: "Early Bird", description: "7-day morning ritual streak" },
-      { name: "Mindful Master", description: "Complete 50 mindfulness rituals" }
-    ]
-  });
-
   const [showAddRitual, setShowAddRitual] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [selectedRitual, setSelectedRitual] = useState(null);
   const [newRitual, setNewRitual] = useState({ name: '', description: '', category: 'mindfulness' });
 
-  const premiumRituals = [
-    { name: "Advanced Meditation", description: "15-minute guided resilience meditation", category: "premium" },
-    { name: "Emotional Mapping", description: "Deep dive into emotional patterns", category: "premium" },
-    { name: "Stress Immunity", description: "Build resistance to daily stressors", category: "premium" }
-  ];
+  // Use the comprehensive data hook
+  const {
+    userData,
+    rituals,
+    sessions,
+    loading,
+    error,
+    createRitual,
+    completeRitual,
+    upgradeToPremium,
+    connectFarcaster,
+    earnedBadges,
+    badgeProgress,
+    isConnected,
+    canShareToFarcaster
+  } = useAppData();
 
   const handleCompleteRitual = (ritualId) => {
-    setRituals(prev => prev.map(ritual => 
-      ritual.id === ritualId 
-        ? { ...ritual, completed: true, points: ritual.points + 5 }
-        : ritual
-    ));
-    
-    setUserData(prev => ({
-      ...prev,
-      totalPoints: prev.totalPoints + 5,
-      streakCount: prev.streakCount + 1
-    }));
-  };
-
-  const handleAddRitual = () => {
-    if (newRitual.name && newRitual.description) {
-      const ritual = {
-        id: Date.now(),
-        ...newRitual,
-        streak: 0,
-        points: 0,
-        completed: false
-      };
-      setRituals(prev => [...prev, ritual]);
-      setNewRitual({ name: '', description: '', category: 'mindfulness' });
-      setShowAddRitual(false);
+    const ritual = rituals.find(r => r.ritualId === ritualId);
+    if (ritual) {
+      setSelectedRitual(ritual);
+      setShowCompletionModal(true);
     }
   };
 
-  const handlePremiumUpgrade = () => {
-    setIsPremium(true);
-    // Add premium rituals to available rituals
-    const premiumRitualsWithIds = premiumRituals.map((ritual, index) => ({
-      ...ritual,
-      id: Date.now() + index,
-      streak: 0,
-      points: 0,
-      completed: false
-    }));
-    setRituals(prev => [...prev, ...premiumRitualsWithIds]);
+  const handleRitualCompletion = async (ritualId, moodBefore, moodAfter, notes, shareToFarcaster) => {
+    try {
+      await completeRitual(ritualId, moodBefore, moodAfter, notes);
+      setShowCompletionModal(false);
+      setSelectedRitual(null);
+    } catch (error) {
+      throw error; // Let the modal handle the error
+    }
   };
+
+  const handleAddRitual = async () => {
+    if (newRitual.name && newRitual.description) {
+      try {
+        await createRitual(newRitual);
+        setNewRitual({ name: '', description: '', category: 'mindfulness' });
+        setShowAddRitual(false);
+      } catch (error) {
+        alert('Failed to create ritual. Please try again.');
+      }
+    }
+  };
+
+  const handlePremiumUpgrade = async () => {
+    try {
+      await upgradeToPremium();
+      setShowPremiumModal(false);
+    } catch (error) {
+      alert('Failed to upgrade to premium. Please try again.');
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="glass rounded-xl p-8 border border-white/30 text-center">
+            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white">Loading your resilience journey...</p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="glass rounded-xl p-8 border border-red-400/30 text-center">
+            <p className="text-red-400 mb-4">Failed to load app data</p>
+            <p className="text-white/70 text-sm">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Show wallet connection prompt
+  if (!isConnected) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="glass rounded-xl p-8 border border-white/30 text-center max-w-md">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Welcome to Resilience Rituals</h2>
+            <p className="text-white/80 mb-6">Connect your wallet to start building unbreakable emotional resilience</p>
+            <p className="text-white/60 text-sm">Your journey to emotional strength begins with a single ritual.</p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   const NavTab = ({ id, icon: Icon, label, isActive, onClick }) => (
     <button
@@ -157,17 +183,17 @@ const App = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {rituals.map(ritual => (
                   <RitualCard
-                    key={ritual.id}
+                    key={ritual.ritualId}
                     ritual={ritual}
-                    variant={ritual.completed ? 'completed' : 'active'}
-                    onComplete={handleCompleteRitual}
+                    variant={ritual.completedToday ? 'completed' : 'active'}
+                    onComplete={() => handleCompleteRitual(ritual.ritualId)}
                   />
                 ))}
               </div>
             </div>
 
             {/* Premium Callout */}
-            {!isPremium && (
+            {!userData.isPremium && (
               <div className="glass rounded-xl p-6 border border-yellow-400/30 bg-gradient-to-r from-yellow-400/10 to-orange-500/10">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-start gap-3">
@@ -196,6 +222,23 @@ const App = () => {
             <ProgressTracker userData={userData} variant="streak" />
             <ProgressTracker userData={userData} variant="badges" />
           </div>
+        )}
+
+        {activeTab === 'badges' && (
+          <BadgesView 
+            earnedBadges={earnedBadges}
+            badgeProgress={badgeProgress}
+            userData={userData}
+          />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsView
+            userData={userData}
+            onConnectFarcaster={connectFarcaster}
+            onUpgradeToPremium={() => setShowPremiumModal(true)}
+            canShareToFarcaster={canShareToFarcaster}
+          />
         )}
 
         {/* Add Ritual Modal */}
@@ -266,6 +309,18 @@ const App = () => {
           isOpen={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
           onUpgrade={handlePremiumUpgrade}
+        />
+
+        {/* Ritual Completion Modal */}
+        <RitualCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => {
+            setShowCompletionModal(false);
+            setSelectedRitual(null);
+          }}
+          ritual={selectedRitual}
+          onComplete={handleRitualCompletion}
+          canShareToFarcaster={canShareToFarcaster}
         />
 
         {/* Bottom Navigation */}
